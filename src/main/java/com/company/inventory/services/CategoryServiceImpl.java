@@ -14,104 +14,135 @@ import com.company.inventory.dao.ICategoryDao;
 import com.company.inventory.model.Category;
 import com.company.inventory.response.CategoryResponseRest;
 
-
 @Service
 public class CategoryServiceImpl implements ICategoryService {
 	@Autowired
 	private ICategoryDao categoryDao;
 
 	@Override
-	@Transactional(readOnly=true)
+	@Transactional(readOnly = true)
 	public ResponseEntity<CategoryResponseRest> search() {
-		CategoryResponseRest  response = new CategoryResponseRest();
-		
+		CategoryResponseRest response = new CategoryResponseRest();
+
 		try {
 			List<Category> category = (List<Category>) categoryDao.findAll();
 			response.getCategoryResponse().setCategory(category);
 			response.setMetadata("Respuesta OK", "00", "Respuesta Exitosa");
-			
-		} catch(Exception e) {
-			
+
+		} catch (Exception e) {
+
 			response.setMetadata("Respuesta no OK", "-1", "Error al consultar");
 			e.getStackTrace();
 			return new ResponseEntity<CategoryResponseRest>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-			
-			
+
 		}
 		return new ResponseEntity<CategoryResponseRest>(response, HttpStatus.OK);
-		
-		
-    
+
 	}
 
 	@Override
-	@Transactional(readOnly=true)
+	@Transactional(readOnly = true)
 	public ResponseEntity<CategoryResponseRest> searchById(Long id) {
-		
-      CategoryResponseRest  response = new CategoryResponseRest();
-      List<Category> list = new ArrayList<>();
-		
+
+		CategoryResponseRest response = new CategoryResponseRest();
+		List<Category> list = new ArrayList<>();
+
 		try {
-			
+
 			Optional<Category> category = categoryDao.findById(id);
-			
-			if(category.isPresent()) {
+
+			if (category.isPresent()) {
 				list.add(category.get());
 				response.getCategoryResponse().setCategory(list);
 				response.setMetadata("Respuesta OK", "00", "Categoria encontrada");
-			}else {
+			} else {
 				response.setMetadata("Respuesta No_OK", "-1", "Categoria no encontrada");
 				return new ResponseEntity<CategoryResponseRest>(response, HttpStatus.NOT_FOUND);
 			}
-			
-			
-		} catch(Exception e) {
-			
+
+		} catch (Exception e) {
+
 			response.setMetadata("Respuesta no OK", "-1", "Error al consultar por id ");
 			e.getStackTrace();
 			return new ResponseEntity<CategoryResponseRest>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-			
-			
+
 		}
 		return new ResponseEntity<CategoryResponseRest>(response, HttpStatus.OK);
-		
-		
-    
 
 	}
 
 	@Override
 	@Transactional
 	public ResponseEntity<CategoryResponseRest> save(Category category) {
-		CategoryResponseRest  response = new CategoryResponseRest();
-	      List<Category> list = new ArrayList<>();
-			
-			try {
-				
-				Category categorySaved = categoryDao.save(category);
-				
-				if(categorySaved != null) {
-					list.add(categorySaved);
-					response.getCategoryResponse().setCategory(list);
-					response.setMetadata("Respuesta OK", "00", "Categoria Guardada");
-				}else {
-					
-					response.setMetadata("Respuesta No_OK", "-1", "Categoria no guardada");
-					return new ResponseEntity<CategoryResponseRest>(response, HttpStatus.BAD_REQUEST);
-					
-				}
-				
-				
-			} catch(Exception e) {
-				
-				response.setMetadata("Respuesta no OK", "-1", "Error al guardar categoria");
-				e.getStackTrace();
-				return new ResponseEntity<CategoryResponseRest>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-				
-				
+		CategoryResponseRest response = new CategoryResponseRest();
+		List<Category> list = new ArrayList<>();
+
+		try {
+
+			Category categorySaved = categoryDao.save(category);
+
+			if (categorySaved != null) {
+				list.add(categorySaved);
+				response.getCategoryResponse().setCategory(list);
+				response.setMetadata("Respuesta OK", "00", "Categoria Guardada");
+			} else {
+
+				response.setMetadata("Respuesta No_OK", "-1", "Categoria no guardada");
+				return new ResponseEntity<CategoryResponseRest>(response, HttpStatus.BAD_REQUEST);
+
 			}
-			return new ResponseEntity<CategoryResponseRest>(response, HttpStatus.OK);
-			
+
+		} catch (Exception e) {
+
+			response.setMetadata("Respuesta no OK", "-1", "Error al guardar categoria");
+			e.getStackTrace();
+			return new ResponseEntity<CategoryResponseRest>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+
+		}
+		return new ResponseEntity<CategoryResponseRest>(response, HttpStatus.OK);
+
+	}
+
+	@Override
+	@Transactional
+	public ResponseEntity<CategoryResponseRest> update(Category category, Long id) {
+		CategoryResponseRest response = new CategoryResponseRest();
+		List<Category> list = new ArrayList<>();
+
+		try {
+
+			Optional<Category> categorysearch = categoryDao.findById(id);
+
+			if (categorysearch.isPresent()) {
+				// process of update register
+				categorysearch.get().setName(category.getName());
+				categorysearch.get().setDescripccion(category.getDescripccion());
+
+				Category CategoryToUpdate = categoryDao.save(categorysearch.get());
+
+				if (CategoryToUpdate != null) {
+					list.add(CategoryToUpdate);
+					response.getCategoryResponse().setCategory(list);
+					response.setMetadata("Respuesta OK", "00", "Categoria Actualizada");
+				} else {
+					response.setMetadata("Respuesta No_OK", "-1", "Categoria no Actualizada");
+					return new ResponseEntity<CategoryResponseRest>(response, HttpStatus.BAD_REQUEST);
+				}
+
+			} else {
+				response.setMetadata("Respuesta No_OK", "-1", "Categoria no encontrada");
+				return new ResponseEntity<CategoryResponseRest>(response, HttpStatus.NOT_FOUND);
+			}
+
+		} catch (Exception e) {
+
+			response.setMetadata("Respuesta no OK", "-1", "Error al actualizar categoria");
+			e.getStackTrace();
+			return new ResponseEntity<CategoryResponseRest>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+
+		}
+		return new ResponseEntity<CategoryResponseRest>(response, HttpStatus.OK);
+
 	}
 
 }
